@@ -1,0 +1,84 @@
+version: '3.9'
+services:
+  ubuntu-c:
+    hostname: ubuntu-c
+    container_name: ubuntu-c
+    image: ubuntu:latest
+    environment:
+      - TZ=Asia/Kathmandu
+      - DEBIAN_FRONTEND=noninteractive
+    command: >
+      bash -c "apt update &&  
+      apt upgrade -y && 
+      apt install -y python3 openssh-client vim iputils-ping software-properties-common && 
+      apt-add-repository -y ppa:ansible/ansible &&
+      apt update && 
+      apt install -y ansible &&
+      tail -f /dev/null"
+    ports:
+      - ${UBUNTUC_PORT_WEB}:80
+      - ${UBUNTUC_PORT_SSHD}:22
+    working_dir: /ansible
+    volumes:
+      - ${HOME}/ansible/ansible_vol/ubuntu-c:/ansible
+    tty: true
+    networks:
+      ansible-net:
+        ipv4_address: 10.5.0.2
+
+
+  ubuntu1:
+    hostname: ubuntu1
+    container_name: ubuntu1
+    image: ubuntu:latest
+    command: >
+      bash -c 'apt update &&
+      apt install ssh vim -y &&
+      echo "PermitRootLogin yes" >> /etc/ssh/sshd_config &&
+      echo root:P@ssword0 | chpasswd &&
+      service ssh restart && service ssh start &&
+      apt update &&
+      tail -f /dev/null'
+    ports:
+      - ${UBUNTU1_PORT_WEB}:80
+      - ${UBUNTU1_PORT_SSHD}:22
+    working_dir: /ansible
+    volumes:
+      - ${HOME}/ansible/ansible_vol/ubuntu1:/ansible
+    tty: true
+    networks:
+      ansible-net:
+        ipv4_address: 10.5.0.3
+
+  ubuntu2:
+    hostname: ubuntu2
+    container_name: ubuntu2
+    image: ubuntu:latest
+    tty: true
+    command: >
+      bash -c 'apt update &&
+      apt install ssh vim -y &&
+      echo "PermitRootLogin yes" >> /etc/ssh/sshd_config &&
+      echo root:P@ssword0 | chpasswd &&
+      service ssh restart && service ssh start &&
+      apt update &&
+      tail -f /dev/null'
+    ports:
+      - ${UBUNTU2_PORT_WEB}:80
+      - ${UBUNTU2_PORT_SSHD}:22
+    working_dir: /ansible
+    volumes:
+      - ${HOME}/ansible/ansible_vol/ubuntu2:/ansible
+    networks:
+      ansible-net:
+        ipv4_address: 10.5.0.4
+  
+
+networks:
+  ansible-net:
+    name: ansible-net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.5.0.0/16
+          gateway: 10.5.0.1
