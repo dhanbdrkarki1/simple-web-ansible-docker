@@ -43,8 +43,6 @@ services:
       - ${NODE1_PORT_WEB}:80
       - ${NODE1_PORT_SSHD}:22
     working_dir: ${WORKING_DIR}
-    volumes:
-      - ${HOME}/ansible/ansible_vol/${NODE1}:${WORKING_DIR}
     tty: true
     networks:
       ansible-net:
@@ -67,8 +65,6 @@ services:
       - ${NODE2_PORT_WEB}:80
       - ${NODE2_PORT_SSHD}:22
     working_dir: ${WORKING_DIR}
-    volumes:
-      - ${HOME}/ansible/ansible_vol/${NODE2}:${WORKING_DIR}
     networks:
       ansible-net:
         ipv4_address: ${NODE2_IP_ADDR}
