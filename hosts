@@ -12,4 +12,3 @@ ansible_ssh_user=root
 ansible_ssh_pass=P@ssword0
 http_port=80
 http_host=localhost
-http_conf=localhost.conf

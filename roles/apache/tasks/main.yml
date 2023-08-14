@@ -1,0 +1,36 @@
+---
+- name: Install Apache
+  apt:
+    name: apache2
+    state: latest
+    update_cache: yes
+
+- name: Create document root for domain configured in host variable
+  file:
+    path: "/var/www/{{ http_host }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: Check index file
+  stat:
+    path: "/var/www/{{ http_host }}/index.html"
+  register: check_index_file
+
+- name: Copy index file to nodes
+  template:
+    src: "index.html.j2"
+    dest: "/var/www/{{ http_host }}/index.html"
+  when: not check_index_file.stat.exists
+
+- name: Set up virtuahHost
+  template:
+    src: "apache.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ http_host }}.conf"
+
+- name: Enable site
+  command: a2ensite {{ http_host }}.conf
+  notify: restart-apache
+
+...

@@ -1,0 +1,10 @@
+---
+- name: Configure Web Server
+  hosts: webserver
+  gather_facts: false
+  become: yes
+  become_method: su
+  roles:
+    - apache
+    
+...

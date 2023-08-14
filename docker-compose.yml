@@ -1,84 +1,84 @@
 version: '3.9'
 services:
-  ubuntu-c:
-    hostname: ubuntu-c
-    container_name: ubuntu-c
-    image: ubuntu:latest
+  control-host:
+    hostname: ${CONTROL_HOST}
+    container_name: ${CONTROL_HOST}
+    image: ${IMAGE_NAME}
     environment:
       - TZ=Asia/Kathmandu
       - DEBIAN_FRONTEND=noninteractive
     command: >
       bash -c "apt update &&  
       apt upgrade -y && 
-      apt install -y python3 openssh-client vim iputils-ping software-properties-common && 
+      apt install -y python3 openssh-client software-properties-common && 
       apt-add-repository -y ppa:ansible/ansible &&
       apt update && 
       apt install -y ansible &&
       tail -f /dev/null"
     ports:
-      - ${UBUNTUC_PORT_WEB}:80
-      - ${UBUNTUC_PORT_SSHD}:22
-    working_dir: /ansible
+      - ${CONTROL_HOST_PORT_WEB}:80
+      - ${CONTROL_HOST_PORT_SSHD}:22
+    working_dir: ${WORKING_DIR}
     volumes:
-      - ${HOME}/ansible/ansible_vol/ubuntu-c:/ansible
+      - ${HOME}/ansible/ansible_vol/${CONTROL_HOST}:${WORKING_DIR}
     tty: true
     networks:
       ansible-net:
-        ipv4_address: 10.5.0.2
+        ipv4_address: ${CONTROL_HOST_IP_ADDR}
 
 
-  ubuntu1:
-    hostname: ubuntu1
-    container_name: ubuntu1
-    image: ubuntu:latest
+  node1:
+    hostname: ${NODE1}
+    container_name: ${NODE1}
+    image: ${IMAGE_NAME}
     command: >
       bash -c 'apt update &&
-      apt install ssh vim -y &&
+      apt install ssh -y &&
       echo "PermitRootLogin yes" >> /etc/ssh/sshd_config &&
       echo root:P@ssword0 | chpasswd &&
       service ssh restart && service ssh start &&
       apt update &&
       tail -f /dev/null'
     ports:
-      - ${UBUNTU1_PORT_WEB}:80
-      - ${UBUNTU1_PORT_SSHD}:22
-    working_dir: /ansible
+      - ${NODE1_PORT_WEB}:80
+      - ${NODE1_PORT_SSHD}:22
+    working_dir: ${WORKING_DIR}
     volumes:
-      - ${HOME}/ansible/ansible_vol/ubuntu1:/ansible
+      - ${HOME}/ansible/ansible_vol/${NODE1}:${WORKING_DIR}
     tty: true
     networks:
       ansible-net:
-        ipv4_address: 10.5.0.3
+        ipv4_address: ${NODE1_IP_ADDR}
 
-  ubuntu2:
-    hostname: ubuntu2
-    container_name: ubuntu2
-    image: ubuntu:latest
+  node2:
+    hostname: ${NODE2}
+    container_name: ${NODE2}
+    image: ${IMAGE_NAME}
     tty: true
     command: >
       bash -c 'apt update &&
-      apt install ssh vim -y &&
+      apt install ssh -y &&
       echo "PermitRootLogin yes" >> /etc/ssh/sshd_config &&
       echo root:P@ssword0 | chpasswd &&
       service ssh restart && service ssh start &&
       apt update &&
       tail -f /dev/null'
     ports:
-      - ${UBUNTU2_PORT_WEB}:80
-      - ${UBUNTU2_PORT_SSHD}:22
-    working_dir: /ansible
+      - ${NODE2_PORT_WEB}:80
+      - ${NODE2_PORT_SSHD}:22
+    working_dir: ${WORKING_DIR}
     volumes:
-      - ${HOME}/ansible/ansible_vol/ubuntu2:/ansible
+      - ${HOME}/ansible/ansible_vol/${NODE2}:${WORKING_DIR}
     networks:
       ansible-net:
-        ipv4_address: 10.5.0.4
+        ipv4_address: ${NODE2_IP_ADDR}
   
 
 networks:
   ansible-net:
-    name: ansible-net
+    name: ${NETWORK_NAME}
     driver: bridge
     ipam:
       config:
-        - subnet: 10.5.0.0/16
-          gateway: 10.5.0.1
+        - subnet: ${NETWORK_SUBNET_BLOCK}
+          gateway: ${NETWORK_GATEWAY}
